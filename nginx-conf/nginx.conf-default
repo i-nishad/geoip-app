@@ -7,7 +7,7 @@ upstream ipgeolocation {
 server {
     listen       80;
     listen  [::]:80;
-    server_name  nishadvs.tech;
+    server_name  ROOT_DOMAIN;
 
 
         location / {
