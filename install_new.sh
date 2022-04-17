@@ -1,14 +1,14 @@
 #!/bin/bash
 
-yum install docker -y
-systemctl restart docker.service
-systemctl enable docker.service
+yum install docker -y &> /dev/null
+systemctl restart docker.service &> /dev/null
+systemctl enable docker.service &> /dev/null
 
-curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
+curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose &> /dev/null
+chmod +x /usr/local/bin/docker-compose &> /dev/null
 
-yum install git -y
-git clone https://github.com/i-nishad/geoip-app.git
+yum install git -y &> /dev/null
+git clone https://github.com/i-nishad/geoip-app.git &> /dev/null
 cd geoip-app
 
 
