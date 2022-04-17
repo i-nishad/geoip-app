@@ -1,0 +1,29 @@
+upstream ipgeolocation {
+       server ipgeolocation-frontend-service-1:8080;
+       server ipgeolocation-frontend-service-2:8080;
+       server ipgeolocation-frontend-service-3:8080;
+}
+
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  ROOT_DOMAIN;
+     rewrite ^ https://ROOT_DOMAIN$request_uri? permanent;
+}
+
+server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+
+        server_name ROOT_DOMAIN;
+
+        ssl_certificate /etc/letsencrypt/live/ROOT_DOMAIN/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/ROOT_DOMAIN/privkey.pem;
+
+        include /etc/nginx/conf.d/options-ssl-nginx.conf;
+
+        location / {
+                proxy_pass http://ipgeolocation;
+        }
+
+    }
