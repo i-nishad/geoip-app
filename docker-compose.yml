@@ -1,0 +1,113 @@
+version: "3"
+
+services:
+
+  ipgeolocation-caching-service:
+
+    image: redis:latest
+    container_name: ipgeolocation-caching-service
+    networks:
+      - ipgeonet
+
+  ipgeolocation-api-service:
+    depends_on:
+      - ipgeolocation-caching-service
+    image: nishadvs/geo-ip-api:1
+    container_name: ipgeolocation-api-service
+    networks:
+      - ipgeonet
+
+    environment:
+
+      - REDIS_PORT=6379
+      - REDIS_HOST=ipgeolocation-caching-service
+      - APP_PORT=8080
+      - API_KEY=68a1d3eb2eea49b2a0e3e1c78257dfdb
+    ports:
+      - 8080:8080
+
+  ipgeolocation-frontend-service-1:
+    depends_on:
+      - ipgeolocation-api-service
+    image: nishadvs/geo-ip-frontend:1
+    container_name: ipgeolocation-frontend-service-1
+    networks:
+      - ipgeonet
+
+    environment:
+      - API_SERVER=ipgeolocation-api-service
+      - API_SERVER_PORT=8080
+      - API_PATH=/api/v1/
+      - APP_PORT=8080
+      - Server=server1
+    ports:
+      - 8081:8080
+
+  ipgeolocation-frontend-service-2:
+    depends_on:
+      - ipgeolocation-frontend-service-1
+    image: nishadvs/geo-ip-frontend:1
+    container_name: ipgeolocation-frontend-service-2
+    networks:
+      - ipgeonet
+
+    environment:
+      - API_SERVER=ipgeolocation-api-service
+      - API_SERVER_PORT=8080
+      - API_PATH=/api/v1/
+      - APP_PORT=8080
+      - Server=server2
+
+    ports:
+      - 8082:8080
+
+  ipgeolocation-frontend-service-3:
+    depends_on:
+      - ipgeolocation-frontend-service-2
+    image: nishadvs/geo-ip-frontend:1
+    container_name: ipgeolocation-frontend-service-3
+    networks:
+      - ipgeonet
+
+    environment:
+      - API_SERVER=ipgeolocation-api-service
+      - API_SERVER_PORT=8080
+      - API_PATH=/api/v1/
+      - APP_PORT=8080
+      - Server=server3
+    ports:
+      - 8083:8080
+
+  nginx1:
+    depends_on:
+      - ipgeolocation-frontend-service-3
+    image: nginx:alpine
+    container_name: nginx1
+    networks:
+      - ipgeonet
+    volumes:
+      - ./nginx-conf:/etc/nginx/conf.d/
+      - certbot:/etc/letsencrypt/
+      - docroot:/var/www/html
+    ports:
+      - 80:80
+      - 443:443
+
+  certbot:
+    depends_on:
+      - nginx1
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot:/etc/letsencrypt/
+      - docroot:/var/www/html
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+networks:
+
+  ipgeonet:
+
+volumes:
+
+     certbot:
+     docroot:
