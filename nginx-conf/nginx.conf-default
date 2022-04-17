@@ -8,9 +8,10 @@ server {
     listen       80;
     listen  [::]:80;
     server_name  ROOT_DOMAIN;
+     root /var/www/html;
 
 
-        location / {
+        location /ip {
                 proxy_pass http://ipgeolocation;
         }
 
